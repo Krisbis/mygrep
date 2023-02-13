@@ -4,30 +4,58 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+void increment1();
+
+int main(int argc, char *argv[])
 {
-    string inputString;
-    string inputSearch;
+    if (argc <= 1 || argc >= 3)
+    {
+        increment1();
+        break;
+    }
+
+    if (argv[1] == "following")
+    {
+        ifstream file(argv[2]);
+        if (!file)
+        {
+            cerr << "Error opening file" << endl;
+            return 1;
+        }
+        if (file)
+        {
+            // getline.
+        }
+        
+    }
+}
+
+void increment1()
+{
+    string inString;
+    string searchStr;
     int lapcount = 0;
 
     cout << "Give a string from which to search for: ";
-    getline(cin, inputString);
+    getline(cin, inString);
     cout << "Give search string:";
-    getline(cin, inputSearch);
+    getline(cin, searchStr);
 
-    for (int i = 0; i < inputString.size(); i++)
+    for (int i = 0; i < inString.size(); i++)
     {
-      
-        if (inputString[i] == inputSearch[lapcount])
+
+        if (inString[i] == searchStr[lapcount])
         {
             lapcount++;
         }
-        if (lapcount == inputSearch.size())
+        if (lapcount == searchStr.size())
         {
-            cout << "Found at round " << i;
-            break;
+            cout << "Key " << searchStr << " found at slot " << i << "\n";
+            lapcount = 0;
         }
-
+        else
+        {
+            cout << "\nKeyword not found in given string"
+        }
     }
-
 }
