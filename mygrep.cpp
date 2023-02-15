@@ -6,7 +6,7 @@ using namespace std;
 
 void increment1();
 void increment2(int, char *[]);
-// void increment3(int, char *[])
+void increment3(int, char *[]);
 
 int main(int argc, char *argv[])
 {
@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
 
     if (argc == 4)
     {
-        true;
+        increment3(argc, argv);
     }
-    
-    // Lukee argc, jos cmd- syote yli 3 argumenttia pitkä, tulostetaan ohje
+
+    // Lukee argc, jos cmd- syote yli 4 (tai == 2) argumenttia pitkä, tulostetaan ohje
     if (argc > 4 || argc == 2)
     {
         cerr << "\nUsage: mygrep keyword file\n";
@@ -104,6 +104,55 @@ void increment2(int argc, char *argv[])
             notFound = false;
         }
     }
+    if (notFound)
+    {
+        cout << "\nRequested keyword not found in this file\n";
+    }
+}
+
+void increment3(int argc, char *argv[])
+{
+    //*--------inkrementti 3----------*//
+    // Tata kommentoin vahemman, koska kayttaa samoja evaita kuin inkrementti kaksi
+
+    string keyword = argv[1];
+    string options = argv[2];
+    ifstream file(argv[3]);
+
+    if (!file)
+    {
+        cerr << "Error opening file\n";
+    }
+
+    string line;
+    int occurences;       // options: -oo
+    int row = 1;          // options: -ol
+    bool notFound = true; // Jos haettu keyword ei löydy
+    while (getline(file, line))
+    {
+        if (line.find(keyword) != string::npos)
+        {
+            if (options == "-oo")
+                occurences++;
+
+            if (options == "-ol")
+                cout << row << ":    " << line << endl;
+
+            if (options == "-olo")
+            {
+                occurences++;
+                cout << row << ":    " << line << endl;
+            }
+
+            notFound = false;
+        }
+        row++; // Muuttuja tallentamaan läpikäydyt rivit.
+    }
+    if (notFound == false && options == "-olo" || options == "-oo")
+    {
+        cout << "\n\nThere were total of: " << occurences << " appearances of keyword: " << keyword << endl;
+    }
+
     if (notFound)
     {
         cout << "\nRequested keyword not found in this file\n";
