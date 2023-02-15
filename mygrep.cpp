@@ -34,7 +34,9 @@ int main(int argc, char *argv[])
         cerr << "\noptional: mygrep ('options') keyword file";
         cerr << "\n-olo -> Displays line numbers and number of occurences";
         cerr << "\n-ol  -> Displays only line numbers";
-        cerr << "\n-oo  -> Displays only number of occurences\n";
+        cerr << "\n-oo  -> Displays only number of occurences";
+        cerr << "\n-oi  -> Displays only number of occurences (case-insensitive)";
+        cerr << "\n-olori  -> Displays line numbers and number of occurences - Removes the keyword from print (case-insensitive)\n";
     }
 
     return 0;
@@ -80,7 +82,7 @@ int increment2(int argc, char *argv[])
 {
     //*--------inkrementti 2----------*//
     // Luodaan muuttuja jolle sijoitetaan hakusana, avataan tiedosto ja luetaan sisalto
-    // Jos tiedostoa ei saada auki, palauttaa errorin
+    // Jos tiedostoa ei saada auki syystä tai toisesta, palauttaa errorin
     string keyword = argv[1];
     ifstream file(argv[2]);
     if (!file)
@@ -106,7 +108,7 @@ int increment2(int argc, char *argv[])
     }
     if (notFound)
     {
-        cout << "\nRequested keyword not found in this file\n";
+        cout << "\nRequested keyword not found in this file 1\n";
     }
     return 0;
 }
@@ -130,15 +132,15 @@ int increment3_4(int argc, char *argv[])
     }
 
     string line;
-    int occurences;       // options: -oo
+    int occurences = 0;   // options: -oo
     int row = 1;          // options: -ol
     bool notFound = true; // Jos haettu keyword ei löydy
 
     while (getline(file, line))
     {
         // ↓↓-inkrementti4 -- case insenitiveness if chosen--↓↓
-        //______________________________________________________//
-        if (options == "-oi" || options == "-olori" || options == "oloi")
+        /*______________________________________________________*/
+        if (options == "-oi" || options == "-olori")
         {
             string lineLower = line;
             transform(lineLower.begin(), lineLower.end(), lineLower.begin(), ::tolower);
@@ -148,23 +150,18 @@ int increment3_4(int argc, char *argv[])
             if (lineLower.find(keywordLower) != string::npos)
             {
                 if (options == "-oi")
-                    cout << lineLower << endl;
-
+                {
+                    cout << line << endl;
+                }
                 if (options == "-olori")
                 {
-                    cout << row << ":   " << lineLower << endl;
+                    cout << row << ":   " << line << endl;
                 }
-                if (options == "-oloi")
-                {
-                    occurences++;
-                    cout << row << ":    " << lineLower << endl;
-                }
-                notFound = false;
             }
         }
 
         // ↓↓-inkrementti3 -- normal flow of options-↓↓
-        //______________________________________________________//
+        /*______________________________________________________*/
         if (line.find(keyword) != string::npos)
         {
             if (options == "-oo")
