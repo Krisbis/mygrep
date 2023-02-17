@@ -5,12 +5,22 @@
 
 using namespace std;
 
+struct optionsStruct
+{
+    bool occurence = false;  // Number of occurences
+    bool lineNumber = false; // Linenumbers
+    bool reverse = false;    // deletion of the keyword containing line
+    bool insens = false;     // case insensitiveness
+};
+
 void increment1();
 int increment2(int, char *[]);
-int increment3_4(int, char *[]);
+int increment3_4(int, char *[], optionsStruct);
+void optionsCheck(string, optionsStruct &);
 
 int main(int argc, char *argv[])
 {
+    optionsStruct method{false, false, false, false};
 
     if (argc == 1)
     {
@@ -24,7 +34,7 @@ int main(int argc, char *argv[])
 
     if (argc == 4)
     {
-        increment3_4(argc, argv);
+        increment3_4(argc, argv, method);
     }
 
     // Lukee argc, jos cmd- syote yli 4 (tai == 2) argumenttia pitkä, tulostetaan ohje
@@ -32,13 +42,11 @@ int main(int argc, char *argv[])
     {
         cerr << "\nUsage: mygrep keyword file\n";
         cerr << "\noptional: mygrep ('options') keyword file";
-        cerr << "\n-olo -> Displays line numbers and number of occurences";
         cerr << "\n-ol  -> Displays only line numbers";
         cerr << "\n-oo  -> Displays only number of occurences";
         cerr << "\n-oi  -> Displays only number of occurences (case-insensitive)";
-        cerr << "\n-olori  -> Displays line numbers and number of occurences - Removes the keyword from print (case-insensitive)\n";
+        cerr << "\n-or  -> Displays every line that doesn't include the keyword";
     }
-
     return 0;
 }
 
@@ -113,7 +121,34 @@ int increment2(int argc, char *argv[])
     return 0;
 }
 
-int increment3_4(int argc, char *argv[])
+void optionsCheck(string option, optionsStruct &method)
+{
+
+    // Tama aliohjelma passaa increment3_4 aliohjelmalle tiedon millä metodeilla (options -o) kayttaja haluaa tulosteen
+    // Sijoittaa siis structiin referenssillä totuusarvon, josta incement3_4 aliohjelma tarkastaa mitä tulostetta halutaan
+    for (int i = 2; i < option.size(); i++)
+    {
+        if (option[i] == 'l')
+        {
+            method.lineNumber = true;
+        }
+        else if (option[i] == 'o')
+        {
+            method.occurence = true;
+        }
+        else if (option[i] == 'i')
+        {
+            method.insens = true;
+        }
+
+        else if (option[i] == 'r')
+        {
+            method.reverse = true;
+        }
+    }
+}
+
+int increment3_4(int argc, char *argv[], optionsStruct method)
 {
     //*--------inkrementti 3----------*//
     //*--------inkrementti 4----------*//
@@ -121,68 +156,65 @@ int increment3_4(int argc, char *argv[])
     // Tahan aliohjelmaan on myös sisallytetty viimeinen inkrementti
     // Viimeistä inkrementtia koskevat patkat ovat merkittynä ohjelman arviointia helpottamiseksi
 
-    string keyword = argv[1];
-    string options = argv[2];
+    string option = argv[1];
+    string keyword = argv[2];
     ifstream file(argv[3]);
 
     if (!file)
     {
         cerr << "Error opening file\n";
-        return 1;
+        return -1;
     }
 
     string line;
     int occurences = 0;   // options: -oo
-    int row = 1;          // options: -ol
+    int row = 0;          // options: -ol
     bool notFound = true; // Jos haettu keyword ei löydy
+
+    optionsCheck(option, method);
 
     while (getline(file, line))
     {
+        row++; // Muuttuja tallentamaan läpikäydyt rivit.
+
         // ↓↓-inkrementti4 -- case insenitiveness if chosen--↓↓
         /*______________________________________________________*/
-        if (options == "-oi" || options == "-olori")
+        if (method.insens)
         {
-            string lineLower = line;
-            transform(lineLower.begin(), lineLower.end(), lineLower.begin(), ::tolower);
-            string keywordLower = keyword;
-            transform(keywordLower.begin(), keywordLower.end(), keywordLower.begin(), ::tolower);
-
-            if (lineLower.find(keywordLower) != string::npos)
-            {
-                if (options == "-oi")
-                {
-                    cout << line << endl;
-                }
-                if (options == "-olori")
-                {
-                    cout << row << ":   " << line << endl;
-                }
-            }
+            transform(line.begin(), line.end(), line.begin(), ::tolower);
+            transform(keyword.begin(), keyword.end(), keyword.begin(), ::tolower);
         }
 
-        // ↓↓-inkrementti3 -- normal flow of options-↓↓
+        // ↓↓-inkrementti4 -- reverse if chosen--↓↓
         /*______________________________________________________*/
-        if (line.find(keyword) != string::npos)
+        if (method.reverse)
         {
-            if (options == "-oo")
-                occurences++;
-
-            if (options == "-ol")
-                cout << row << ":    " << line << endl;
-
-            if (options == "-olo")
+            if (line.find(keyword) != string::npos)
             {
+                notFound = false;
                 occurences++;
-                cout << row << ":    " << line << endl;
+                continue;
             }
+            method.lineNumber ? cout << row << ":   " : cout << "";
+            cout << line << endl;
+        }
 
+        // ↓↓-inkrementti3&4 -- normal flow of options-↓↓
+        /*______________________________________________________*/
+        if (line.find(keyword) != string::npos && !method.reverse)
+        {
+            // options: line numbers
+            method.lineNumber ? cout << row << ":   " : cout << "";
+
+            cout << line << endl;
+
+            occurences++;
             notFound = false;
         }
-        row++; // Muuttuja tallentamaan läpikäydyt rivit.
     }
 
-    // Tulostetaan tulos luupin ulkopuolella -olo ja -oo vaihtoehdoille
-    if (notFound == false && options == "-olo" || options == "-oo")
+    // Tulostetaan tulos luupin ulkopuolella vaihtoehdoille joissa occurence valittuna
+    if (!notFound && method.occurence)
     {
         cout << "\n\nThere were total of: " << occurences << " appearances of keyword: " << keyword << endl;
     }
