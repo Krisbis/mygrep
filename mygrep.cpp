@@ -57,6 +57,7 @@ void increment1()
     string inString;
     string searchStr;
     int lapcount = 0;
+    bool found = false;
 
     cout << "Give a string from which to search from: ";
     getline(cin, inString);
@@ -82,8 +83,14 @@ void increment1()
         {
             cout << "Key " << searchStr << " found at slot " << (i - searchStr.size() + 1) << "\n";
             lapcount = 0;
+            found = true;
         }
     }
+    if (!found)
+    {
+        cout << "search key: " << searchStr << " not found in: " << inString;
+    }
+    
 }
 
 int increment2(int argc, char *argv[])
